@@ -1,0 +1,553 @@
+ORG 00H
+
+MOV P2,#0FFH ;TO MAKE P2 as Input Port
+
+LJMP MAIN
+
+INIT:
+
+MOV A, #38H    ; INITIATE LCD
+
+ACALL COMMWRT    ;   ;
+
+MOV A, #0EH    ; DISPLAY ON CURSOR ON
+
+ACALL COMMWRT    ;
+
+MOV A,#01H
+
+ACALL COMMWRT
+
+MOV A, #82H    ; CURSOR AT LINE 1 POSITION 1
+
+ACALL COMMWRT    ;
+
+  ;
+
+MOV A,#'E'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'N'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'T'    ; SEND ASCII DATA
+
+LCALL DATAQ    ;
+
+MOV A,#'E'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'R'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#' '    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'T'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'I'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'M'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+MOV A,#'E'    ; SEND ASCII DATA
+
+LCALL DATAQ
+
+RET
+
+COMMWRT:
+
+MOV P0, A    ;
+
+CLR P3.0    ; RS = 0 FOR COMMAND REGISTER
+
+CLR P3.1    ; R/W = 0 FOR WRITE
+
+SETB P3.2    ; E = 1 FOR HIGH PULSE    ;
+
+CLR P3.2    ; E = 0 FOR LOW PULSE
+
+ACALL DELAY
+
+RET
+
+DATAQ:
+
+MOV P0,A
+
+SETB P3.0
+
+CLR P3.1
+
+SETB P3.2
+
+CLR P3.2
+
+ACALL DELAY
+
+RET
+
+DELAY:
+
+CLR P3.2
+
+CLR P3.0
+
+SETB P3.1
+
+MOV P0,#0FFH ;
+
+SETB P3.2
+
+MOV A,P0
+
+JB ACC.7,DELAY
+
+CLR P3.2
+
+CLR P3.1
+
+RET
+
+  B1:
+
+  MOV A,#'1'    
+
+  JNB P2.4,$
+
+  MOV @R0,#1H
+
+  MOV B,@R0
+
+ ANL B,#0FH
+
+  MOV @R0,B
+
+  INC R0
+
+  LCALL DATAQ
+
+  ;LCALL DELAY
+
+  LJMP KEYPAD1
+
+    B2:
+
+    MOV A,#'2'
+
+    JNB P2.5,$
+
+    MOV @R0,#2H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD2
+
+    B3:
+
+    MOV A,#'3'
+
+    JNB P2.6,$
+
+    MOV @R0,#3H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD3
+
+ 
+
+  B7:
+
+    MOV A,#'7'
+
+    JNB P2.4,$
+
+    MOV @R0,#7H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD7
+
+    B4:
+
+    MOV A,#'4'
+
+    JNB P2.4,$
+
+    MOV @R0,#4H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD4
+
+    MAIN:
+
+    LCALL INIT
+
+    MOV A, #08cH    ; CURSOR AT LINE 2 POSITION 1
+
+    LCALL COMMWRT 
+
+    MOV R0,#40H
+
+    KEYPAD:
+
+    CLR P2.0
+
+    JNB P2.4,B1
+
+    KEYPAD1:
+
+    JNB P2.5,B2
+
+    KEYPAD2:
+
+    JNB P2.6,B3
+
+    KEYPAD3:
+
+    SETB P2.0
+
+    CLR P2.1
+
+    JNB P2.4,B4
+
+    KEYPAD4:
+
+    JNB P2.5,B5
+
+    KEYPAD5:
+
+    JNB P2.6,B6
+
+    KEYPAD6:
+
+    SETB P2.1
+
+    CLR P2.2
+
+    JNB P2.4,B7
+
+    KEYPAD7:
+
+    JNB P2.5,B8
+
+    KEYPAD8:
+
+    JNB P2.6,B9
+
+    KEYPAD9:
+
+    SETB P2.2
+
+    CLR P2.3
+
+    KEYPAD10: 
+
+    JNB P2.5,B11
+
+    KEYPAD11:
+
+    JNB P2.6,B12
+
+    KEYPAD12:
+
+    SETB P2.3       
+
+    CJNE  R7,#20H,KEYPAD
+
+    ACALL PACK
+
+    LOOP:
+
+    CLR P1.1
+
+    ACALL DELAY1
+
+    SETB P1.1
+
+    SJMP LOOP
+
+    STOP:
+
+    SJMP STOP
+
+    
+
+     B11:
+
+    MOV A,#'0'
+
+    JNB P2.5,$
+
+     MOV @R0,#0H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD11
+
+     B9:
+
+    MOV A,#'9'
+
+    JNB P2.6,$
+
+    MOV @R0,#9H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD9
+
+    
+
+     B8:
+
+    MOV A,#'8'
+
+    JNB P2.5,$
+
+    MOV @R0,#8H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD8
+
+        B6:
+
+    MOV A,#'6'
+
+    JNB P2.6,$
+
+    MOV @R0,#6H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD6
+
+    B5:
+
+    MOV A,#'5'
+
+    JNB P2.5,$
+
+     MOV @R0,#5H
+
+    MOV B,@R0
+
+    ANL B,#0FH
+
+    MOV @R0,B
+
+    INC R0
+
+    LCALL DATAQ
+
+    LJMP KEYPAD5
+
+  
+
+       B12:
+
+    MOV A,#'#'
+
+    JNB P2.6,$
+
+    LCALL DATAQ
+
+    MOV R7,#20H    
+
+    LJMP KEYPAD12
+
+  
+
+PACK:
+
+MOV R0,#40H
+
+MOV A,@R0
+
+INC R0
+
+SWAP A
+
+ADD A,@R0
+
+MOV R5,A
+
+ACALL ASCI
+
+RET
+
+ASCI:
+
+ACALL DELY
+
+MOV A,R5
+
+MOV B,A
+
+ANL A,#0F0H
+
+SWAP A
+
+ADD A,#30H
+
+MOV R2,A
+
+ACALL COM
+
+MOV A,R2
+
+MOV R7,#0FFH
+
+ACALL DELAY1
+
+ACALL DELAY1
+
+ACALL DATAQ
+
+MOV A,B
+
+ANL A,#0FH
+
+MOV R6,A
+
+CJNE A,#0AH,ADJUST
+
+LOL:
+
+ADD A,#30H
+
+MOV R3,A
+
+MOV A,R3
+
+MOV R7,#0FFH
+
+ACALL DELAY1
+
+ACALL DELAY1
+
+ACALL DATAQ
+
+DJNZ R5,ASCI
+
+RET
+
+ADJUST:
+
+JC ADJ
+
+SUBB A,#06H
+
+ADJ:SJMP LOL
+
+COM:
+
+MOV A, #08cH    ; CURSOR AT LINE 2 POSITION 1
+
+LCALL COMMWRT 
+
+ACALL DELAY1
+
+RET
+
+DELAY1:
+
+DJNZ R7,DELAY1
+
+RET
+
+DELY:
+
+MOV R1,#010H
+
+MOV R6,#0FFH
+
+HERE1:MOV R7,#0FFH
+
+HERE2: DJNZ R7,HERE2
+
+DJNZ R6,HERE1
+
+DJNZ R1,HERE1
+
+RET
+
+    END
