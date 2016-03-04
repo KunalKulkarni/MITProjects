@@ -1,0 +1,221 @@
+LEX FILE:
+
+%{
+
+#include "y.tab.h"
+
+%}
+
+%%
+
+"#include<stdio.h>" {return HEAD;}
+
+"main()" {return MAIN;}
+
+"{" {return OC;}
+
+"}" {return CC;}
+
+"(" {return OB;}
+
+")" {return CB;}
+
+";" {return SEMI;}
+
+[<>!] {return RELOP;}
+
+[=] {return EQ;}
+
+"void"|"int"|"float"|"double"|"char"|"bool"|"long"|"short" {return DATATY;}
+
+"for" {return FORL;}
+
+"while" {return WHILE;}
+
+"do" {return DO;}
+
+"if" {return IF;}
+
+"cout" {return COUT;}
+
+"cin" {return CIN;}
+
+"<<" {return CLEFT;}
+
+">>" {return CRIGHT;}
+
+"+"|"-"|"*"|"/"|"%" {return OP;}
+
+[0-9]+ {return DIGIT;}
+
+[a-zA-Z]+ {return ID;}
+
+"\n" {return ENTER;}
+
+" " {return SPACE;}
+
+"," {return COMMA;}
+
+"++"|"--" {return INCRDECR;}
+
+"?" {return QUE;}
+
+":" {return COL;}
+
+%%
+
+
+
+YACC FILE:
+
+%{
+
+#include<stdio.h>
+
+extern FILE *yyin;
+
+%}
+
+%token MAIN HEAD ID ENTER OB CB DATATY EQ DIGIT SEMI OC CC SPACE 
+
+INCRDECR FORL RELOP WHILE DO COMMA IF QUE COL COUT CIN CLEFT CRIGHT 
+
+OP
+
+%start CHECK
+
+%%
+
+CHECK : HEAD ENTER FUNC MAIN ENTER OC ENTER BLAH CC ENTER FUNC 
+
+{printf("Valid C++ File.\n");exit(0);};
+
+BLAH: LOOP BLAH
+
+ |IF_STMT BLAH
+
+ |DOWHILE BLAH
+
+ |WHILES BLAH
+
+ |TERN BLAH
+
+ |INIT BLAH
+
+ | ;
+
+ 
+
+INIT: DATATY SPACE EXP EQ DIGIT SEMI ENTER
+
+ |DATATY SPACE EXP SEMI ENTER
+
+ |DATATY SPACE EXP EQ EXP SEMI ENTER
+
+ |ID EQ EXP SEMI ENTER
+
+ |COUT_STMT ENTER
+
+ |CIN_STMT ENTER
+
+ |ID EQ EXP OP EXP SEMI ENTER
+
+ | ;
+
+LOOP: FORL OB DATATY SPACE EXP EQ EXP SEMI EXP RELOPEQ EXP SEMI EXP 
+
+INCRDECR CB ENTER OC ENTER BLAH CC ENTER
+
+ |FORL OB EXP EQ EXP SEMI EXP RELOPEQ EXP SEMI EXP INCRDECR CB ENTER 
+
+OC ENTER BLAH CC ENTER
+
+ |FORL OB SEMI EXP RELOPEQ EXP SEMI EXP INCRDECR CB ENTER OC ENTER 
+
+BLAH CC ENTER
+
+ |FORL OB SEMI SEMI CB ENTER OC ENTER BLAH CC ENTER
+
+ |FORL OB SEMI SEMI CB SEMI ENTER
+
+ |;
+
+DOWHILE: DO ENTER OC ENTER BLAH CC WHILE OB EXP RELOPEQ EXP CB SEMI 
+
+ENTER
+
+ | ;
+
+WHILES: WHILE OB EXP RELOPEQ EXP CB ENTER OC ENTER BLAH CC ENTER
+
+ |WHILE OB EXP RELOPEQ EXP CB SEMI ENTER
+
+ | ;
+
+FUNC: DATATY SPACE EXP OB ARG CB ENTER OC ENTER BLAH CC ENTER
+
+ | ;
+
+ARG: DATATY SPACE EXP
+
+ |DATATY SPACE EXP COMMA ARG
+
+ | ;
+
+IF_STMT:
+
+ |IF OB EXP RELOPEQ EXP CB ENTER IF_STMT
+
+ |IF OB EXP RELOPEQ EXP CB ENTER OC ENTER BLAH CC ENTER
+
+ |IF OC ENTER IF_STMT CC ENTER
+
+ | ;
+
+TERN: ID EQ OB OB EXP RELOPEQ EXP CB QUE EXP COL EXP CB SEMI ENTER
+
+ | ;
+
+COUT_STMT: COUT CLEFT EXP SEMI COUT_STMT
+
+ | ;
+
+ 
+
+CIN_STMT: |CIN CRIGHT EXP SEMI CIN_STMT
+
+ | ;
+
+EXP: ID EXP
+
+ |DIGIT
+
+ | ID DIGIT EXP
+
+ | ;
+
+RELOPEQ: RELOP| RELOP EQ| EQ EQ| ;
+
+ 
+
+%%
+
+main()
+
+{
+
+yyin=fopen("new.cpp","r");
+
+yyparse();
+
+return 0;
+
+}
+
+yyerror()
+
+{
+
+printf("Invalid statement.\n");
+
+}
